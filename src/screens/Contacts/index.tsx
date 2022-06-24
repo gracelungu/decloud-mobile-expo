@@ -3,7 +3,7 @@ import { Text } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Contact from "../../components/Contact";
-// import Sync from '../../components/Sync';
+import Sync from "../../components/Sync";
 import styles from "./styles";
 
 const contacts = [
@@ -25,14 +25,13 @@ const ListHeader = () => (
 function ContactsScreen() {
   return (
     <>
-      <SafeAreaView />
       <FlatList
         contentContainerStyle={styles.container}
         ListHeaderComponent={ListHeader}
         data={[...contacts, ...contacts, ...contacts]}
         renderItem={({ item }) => <Contact contact={item} />}
       />
-      {/* <Sync /> */}
+      <Sync />
     </>
   );
 }

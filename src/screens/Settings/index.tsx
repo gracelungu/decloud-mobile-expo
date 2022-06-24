@@ -1,20 +1,19 @@
-import React from 'react';
-import {Switch, Text, TouchableOpacity, View} from 'react-native';
-import {ScrollView} from 'react-native-gesture-handler';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {s} from 'react-native-size-matters';
-import WalletIcon from '../../assets/icons/Wallet.svg';
-import ContractIcon from '../../assets/icons/Contract.svg';
-import PolygonIcon from '../../assets/icons/Polygon.svg';
-import CloudIcon from '../../assets/icons/Cloud.svg';
-import RemoveIcon from '../../assets/icons/Remove.svg';
-import styles from './styles';
-import colors from '../../styles/colors';
+import React from "react";
+import { Switch, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { s } from "react-native-size-matters";
+import WalletIcon from "../../assets/icons/Wallet.svg";
+import ContractIcon from "../../assets/icons/Contract.svg";
+import PolygonIcon from "../../assets/icons/Polygon.svg";
+import CloudIcon from "../../assets/icons/Cloud.svg";
+import RemoveIcon from "../../assets/icons/Remove.svg";
+import styles from "./styles";
+import colors from "../../styles/colors";
 
 function SettingsScreen() {
   return (
     <>
-      <SafeAreaView style={styles.container} />
       <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
         <View>
           <Text style={styles.title}>Settings</Text>
@@ -59,7 +58,7 @@ function SettingsScreen() {
 
                 <Switch
                   style={styles.switch}
-                  trackColor={{false: colors.lightGray, true: colors.primary}}
+                  trackColor={{ false: colors.lightGray, true: colors.primary }}
                   thumbColor={colors.white}
                   ios_backgroundColor={colors.lightGray}
                   value={true}
@@ -79,7 +78,7 @@ function SettingsScreen() {
 
                 <Switch
                   style={styles.switch}
-                  trackColor={{false: colors.lightGray, true: colors.primary}}
+                  trackColor={{ false: colors.lightGray, true: colors.primary }}
                   thumbColor={colors.white}
                   ios_backgroundColor={colors.lightGray}
                   value={true}

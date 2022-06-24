@@ -92,7 +92,7 @@ const config: ExpoConfig = {
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
-  scheme: "myapp",
+  scheme: "decloud",
   userInterfaceStyle: "automatic",
   splash: {
     image: "./assets/images/splash.png",
@@ -116,6 +116,15 @@ const config: ExpoConfig = {
   web: {
     favicon: "./assets/images/favicon.png",
   },
+  plugins: [
+    [
+      "expo-image-picker",
+      {
+        photosPermission:
+          "Permission to access your photos to upload on the blockchain",
+      },
+    ],
+  ],
 };
 
 export default withPackageVisibility(config);

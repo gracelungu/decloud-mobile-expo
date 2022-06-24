@@ -1,7 +1,7 @@
-import {CONTACTS_SCREEN} from '../constants/screens';
-import Icon from '../assets/icons/Contact.svg';
-import IconActive from '../assets/icons/Contact-filled.svg';
-import ContactsScreen from '../screens/Contacts';
+import { CONTACTS_SCREEN } from "../constants/screens";
+import Icon from "../assets/icons/Contacts.svg";
+import IconActive from "../assets/icons/Contacts-filled.svg";
+import ContactsScreen from "../screens/Contacts";
 
 const contactsRouter = {
   Icon,

@@ -20,6 +20,9 @@ const { withWalletConnect } = require("@walletconnect/react-native-dapp");
 // the environment is set up appropriately
 registerRootComponent(
   withWalletConnect(App, {
+    clientMeta: {
+      description: "Connect with WalletConnect",
+    },
     redirectUrl:
       Platform.OS === "web" ? window.location.origin : `${scheme}://`,
     storageOptions: {

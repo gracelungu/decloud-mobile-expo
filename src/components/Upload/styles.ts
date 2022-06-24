@@ -3,19 +3,19 @@ import colors from "../../styles/colors";
 
 export default ScaledSheet.create({
   container: {
-    flexDirection: "row",
+    position: "absolute",
+    right: "10@s",
+    bottom: "20@s",
+    justifyContent: "center",
     alignItems: "center",
-    padding: "10@s",
-    borderRadius: "40@s",
+    width: "50@s",
+    height: "50@s",
+    borderRadius: "50@s",
     backgroundColor: colors.white,
 
     shadowColor: "#000",
     shadowOffset: { width: -1, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: "50@s",
-  },
-  text: {
-    fontSize: "12@s",
-    marginLeft: "5@s",
   },
 });

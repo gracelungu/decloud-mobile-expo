@@ -1,23 +1,18 @@
-import { useWalletConnect } from "@walletconnect/react-native-dapp";
-import React, { useEffect } from "react";
+import { useAtom } from "jotai";
+import React from "react";
 import { Text, TouchableOpacity } from "react-native";
 import SyncIcon from "../../assets/icons/Synchronize.svg";
+import authAtom from "../../store/atoms/auth";
 import styles from "./styles";
 
 function Sync() {
-  const connector = useWalletConnect();
+  const [{ connected }] = useAtom<any>(authAtom);
 
-  const connectWallet = React.useCallback(() => {
-    return connector.connect();
-  }, [connector]);
-
-  useEffect(() => {
-    console.log(connector.accounts);
-  }, [connector]);
+  if (!connected) return null;
 
   return (
-    <TouchableOpacity style={styles.container} onPress={connectWallet}>
-      <SyncIcon width={20} height={20} />
+    <TouchableOpacity style={styles.container}>
+      <SyncIcon width={18} height={18} />
       <Text style={styles.text}>Synchronize</Text>
     </TouchableOpacity>
   );

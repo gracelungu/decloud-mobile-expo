@@ -1,22 +1,27 @@
-import {ScaledSheet} from 'react-native-size-matters';
+import { ScaledSheet } from "react-native-size-matters";
 
 export default ScaledSheet.create({
+  titleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingBottom: "5@s",
+  },
   container: {
-    width: '100%',
-    paddingRight: '15@s',
-    paddingLeft: '15@s',
+    width: "100%",
+    paddingRight: "15@s",
+    paddingLeft: "15@s",
   },
   columnWrapper: {
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   title: {
-    fontSize: '30@s',
-    fontWeight: '600',
-    paddingBottom: '3@s',
+    fontSize: "30@s",
+    fontWeight: "600",
   },
   subtitle: {
-    fontSize: '15@s',
-    fontWeight: '300',
-    paddingBottom: '5@s',
+    fontSize: "13@s",
+    fontWeight: "300",
+    paddingBottom: "5@s",
   },
 });
