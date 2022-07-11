@@ -1,3 +1,4 @@
+import { useAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import { RefreshControl, Text, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
@@ -7,20 +8,20 @@ import Photo from "../../components/Photo";
 import Sync from "../../components/Sync";
 import Upload from "../../components/Upload";
 import useLogin from "../../hooks/useLogin";
+import photosAtom from "../../store/atoms/photos";
 import colors from "../../styles/colors";
 import styles from "./styles";
 
 function PhotosScreen() {
   const { connectWallet, accounts } = useLogin();
   const [refreshing, setRefreshing] = useState(false);
+  const [photos, setPhotos] = useAtom<any>(photosAtom);
 
-  const photos = [
-    // "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
-    // "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
-    // "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
-    // "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
-    // "https://images.unsplash.com/photo-1518791841217-8f162f1e1131?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60",
-  ];
+  const onUploadCompleted = (photo: string) => {
+    setPhotos([...photos, photo]);
+  };
+
+  console.log({ photos });
 
   const refresh = () => {
     setRefreshing(true);
@@ -57,11 +58,15 @@ function PhotosScreen() {
         columnWrapperStyle={styles.columnWrapper}
         ListHeaderComponent={ListHeader}
         ListEmptyComponent={Empty}
-        data={photos}
+        data={
+          [] || [
+            "https://gateway.pinata.cloud/ipfs/bafkreiblpl6xnjgabpczbg3gxhgy3n3a32qon6qdp4pkrlnha6wj4rholq",
+          ]
+        }
         renderItem={({ item }) => <Photo photo={item} />}
         numColumns={2}
       />
-      <Upload />
+      <Upload onUploadCompleted={onUploadCompleted} fileType="Images" />
     </>
   );
 }

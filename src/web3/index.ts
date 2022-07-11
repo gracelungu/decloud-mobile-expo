@@ -3,7 +3,7 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import { cloudContractAddress, networks } from "../../contract";
 import { cloudABI } from "../../contract/abi";
 
-export const getContract = async (connector: any) => {
+export const getProvider = async (connector: any) => {
   const provider = new WalletConnectProvider({
     ...networks.ropsten,
     connector,
@@ -11,6 +11,10 @@ export const getContract = async (connector: any) => {
   });
 
   await provider.enable();
-  const web3Provider = new providers.Web3Provider(provider);
+  return new providers.Web3Provider(provider);
+};
+
+export const getContract = async (connector: any) => {
+  const web3Provider = await getProvider(connector);
   return new ethers.Contract(cloudContractAddress, cloudABI, web3Provider);
 };
