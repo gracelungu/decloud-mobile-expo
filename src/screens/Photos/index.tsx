@@ -1,3 +1,4 @@
+import { useWalletConnect } from "@walletconnect/react-native-dapp";
 import { useAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import { RefreshControl, Text, View } from "react-native";
@@ -8,17 +9,38 @@ import Photo from "../../components/Photo";
 import Sync from "../../components/Sync";
 import Upload from "../../components/Upload";
 import useLogin from "../../hooks/useLogin";
+import authAtom from "../../store/atoms/auth";
+import cloudAtom from "../../store/atoms/cloud";
 import photosAtom from "../../store/atoms/photos";
 import colors from "../../styles/colors";
+import { getContractWithSigner, loadContract } from "../../web3";
 import styles from "./styles";
 
 function PhotosScreen() {
+  const connector = useWalletConnect();
+  const [cloud] = useAtom(cloudAtom);
+  const [{ connected }] = useAtom<any>(authAtom);
   const { connectWallet, accounts } = useLogin();
   const [refreshing, setRefreshing] = useState(false);
   const [photos, setPhotos] = useAtom<any>(photosAtom);
 
+  console.log(cloud);
+
   const onUploadCompleted = (photo: string) => {
-    setPhotos([...photos, photo]);
+    setPhotos([photo, ...photos]);
+  };
+
+  const getFiles = async () => {
+    setRefreshing(true);
+    const contract = await loadContract(connector, cloud.address);
+    const contractWithSigner = await getContractWithSigner(connector, contract);
+    const files = await contractWithSigner.getFiles("photo", {
+      gasLimit: 3000000,
+    });
+
+    const extractedFiles = files.map((file: any[]) => file[1]);
+    setPhotos(extractedFiles);
+    setRefreshing(false);
   };
 
   console.log({ photos });
@@ -26,18 +48,26 @@ function PhotosScreen() {
   const refresh = () => {
     setRefreshing(true);
     connectWallet();
+    if (connected) {
+      getFiles();
+    }
   };
 
   useEffect(() => {
     setRefreshing(false);
   }, [accounts]);
 
+  useEffect(() => {
+    if (connected) {
+      getFiles();
+    }
+  }, [connected]);
+
   const ListHeader = () => (
     <>
-      <SafeAreaView />
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Photos</Text>
-        <Sync />
+        <Sync fileType="photo" files={photos} setFiles={setPhotos} />
       </View>
       <Text style={styles.subtitle}>102 files have not been synched</Text>
     </>
@@ -45,6 +75,7 @@ function PhotosScreen() {
 
   return (
     <>
+      <SafeAreaView />
       <FlatList
         onRefresh={connectWallet}
         refreshControl={
@@ -58,11 +89,7 @@ function PhotosScreen() {
         columnWrapperStyle={styles.columnWrapper}
         ListHeaderComponent={ListHeader}
         ListEmptyComponent={Empty}
-        data={
-          [] || [
-            "https://gateway.pinata.cloud/ipfs/bafkreiblpl6xnjgabpczbg3gxhgy3n3a32qon6qdp4pkrlnha6wj4rholq",
-          ]
-        }
+        data={photos}
         renderItem={({ item }) => <Photo photo={item} />}
         numColumns={2}
       />

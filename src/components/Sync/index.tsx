@@ -3,44 +3,45 @@ import { useAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Text, TouchableOpacity } from "react-native";
 import SyncIcon from "../../assets/icons/Synchronize.svg";
+import { DEFAULT_ADDRESS } from "../../constants/web3";
 import authAtom from "../../store/atoms/auth";
 import cloudAtom from "../../store/atoms/cloud";
-import { getContract, getProvider } from "../../web3";
+import { getContractWithSigner, loadContract } from "../../web3";
 import styles from "./styles";
 
-function Sync() {
+type Props = {
+  fileType: string;
+  files: any[];
+  setFiles: (files: any[]) => void;
+};
+
+const Sync: React.FC<Props> = ({ fileType, files, setFiles }) => {
+  const connector = useWalletConnect();
   const [loading, setLoading] = useState(false);
   const [cloud, setCloud] = useAtom(cloudAtom);
-  const [contract, setContract] = useState<any>(null);
-  const [{ connected }] = useAtom<any>(authAtom);
+  const [
+    {
+      connected,
+      accounts: [account],
+    },
+  ] = useAtom<any>(authAtom);
 
-  if (!connected) return null;
+  if (!connected || files.length === 0) return null;
 
-  const connector = useWalletConnect();
-
-  const loadContract = async () => {
-    setLoading(true);
-    const response = await getContract(connector);
-    setContract(response);
-    setLoading(false);
-  };
-
-  const getContractWithSigner = async () => {
-    const provider = await getProvider(connector);
-    const signer = provider.getSigner();
-    const contractWithSigner = contract.connect(signer);
-    return contractWithSigner;
+  const createCloudAddress = async (contractWithSigner: any) => {
+    const contractAddress = await contractWithSigner.createAddressCloud();
+    await contractWithSigner.transferOwnership(account);
+    setCloud({
+      address: contractAddress,
+    });
   };
 
   const checkOrCreateCloud = async () => {
-    if (!contract) return;
-    const response = await contract.getOwnerAddressCloud();
+    const contract = await loadContract(connector);
+    const contractWithSigner = await getContractWithSigner(connector, contract);
+    const response = await contractWithSigner.getOwnerAddressCloud();
 
-    console.log({ response });
-
-    const contractWithSigner = await getContractWithSigner();
-
-    if (response === "0x0000000000000000000000000000000000000000") {
+    if (response === DEFAULT_ADDRESS) {
       Alert.alert(
         "Create your private cloud",
         "Do you want to create a new cloud?",
@@ -51,13 +52,7 @@ function Sync() {
           },
           {
             text: "Create",
-            onPress: async () => {
-              const contractAddress =
-                await contractWithSigner.createAddressCloud();
-              setCloud({
-                address: contractAddress,
-              });
-            },
+            onPress: async () => await createCloudAddress(contractWithSigner),
           },
         ],
         { cancelable: true }
@@ -67,17 +62,51 @@ function Sync() {
     }
 
     setCloud({
-      ...cloud,
       address: response,
     });
   };
 
-  useEffect(() => {
-    loadContract();
-  }, []);
+  const synchronize = async () => {
+    setLoading(true);
+
+    const filesToUpload = files.map((photo: any) => [
+      photo.split("/").pop(),
+      photo,
+      fileType,
+      Date.now(),
+    ]);
+
+    await checkOrCreateCloud();
+
+    const contract = await loadContract(connector, cloud.address);
+    const contractWithSigner = await getContractWithSigner(connector, contract);
+    contractWithSigner.createFiles(fileType, filesToUpload, {
+      gasLimit: 3000000,
+    });
+    setFiles([]);
+    setLoading(false);
+  };
+
+  const alertOnSync = () => {
+    Alert.alert(
+      "Synchronization",
+      "This action will clear uploaded files that are not synched, even though you decline the transaction. Are you sure you want to continue?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: synchronize,
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   return (
-    <TouchableOpacity style={styles.container} onPress={checkOrCreateCloud}>
+    <TouchableOpacity style={styles.container} onPress={alertOnSync}>
       {!loading && (
         <>
           <SyncIcon width={18} height={18} />
@@ -88,6 +117,6 @@ function Sync() {
       {loading && <ActivityIndicator />}
     </TouchableOpacity>
   );
-}
+};
 
 export default Sync;
