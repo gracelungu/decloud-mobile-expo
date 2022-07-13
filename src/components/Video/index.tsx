@@ -11,7 +11,7 @@ const Video: React.FC<Props> = ({ video: videoURL }) => {
     <VideoPlayer
       key={videoURL}
       source={{ uri: videoURL }}
-      style={styles.imageStyle}
+      style={styles.videoStyle}
     />
   );
 };

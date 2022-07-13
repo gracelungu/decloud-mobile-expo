@@ -10,8 +10,20 @@ import CloudIcon from "../../assets/icons/Cloud.svg";
 import RemoveIcon from "../../assets/icons/Remove.svg";
 import styles from "./styles";
 import colors from "../../styles/colors";
+import authAtom from "../../store/atoms/auth";
+import { useAtom } from "jotai";
+import shortenAddress from "../../helpers/shortenAddress";
+import cloudAtom from "../../store/atoms/cloud";
 
 function SettingsScreen() {
+  const [
+    {
+      accounts: [account],
+    },
+  ] = useAtom<any>(authAtom);
+
+  const [{ address: cloudAddress }] = useAtom<any>(cloudAtom);
+
   return (
     <>
       <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
@@ -22,7 +34,9 @@ function SettingsScreen() {
             <Text style={styles.itemTitle}>Connected Wallet</Text>
             <View style={styles.itemSubContainer}>
               <WalletIcon width={s(18)} height={s(18)} />
-              <Text style={styles.itemSubtitle}> EF32XXXXXXXXXXC266 </Text>
+              <Text style={styles.itemSubtitle}>
+                {shortenAddress(account?.toUpperCase())}
+              </Text>
             </View>
 
             <TouchableOpacity>
@@ -34,7 +48,9 @@ function SettingsScreen() {
             <Text style={styles.itemTitle}>Cloud address</Text>
             <View style={styles.itemSubContainer}>
               <ContractIcon width={s(18)} height={s(18)} />
-              <Text style={styles.itemSubtitle}> EF32XXXXXXXXXXC266 </Text>
+              <Text style={styles.itemSubtitle}>
+                {shortenAddress(cloudAddress?.toUpperCase())}
+              </Text>
             </View>
           </View>
 

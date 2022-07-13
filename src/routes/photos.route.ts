@@ -1,7 +1,7 @@
-import {PHOTOS_SCREEN} from '../constants/screens';
-import PhotosScreen from '../screens/Photos';
-import Icon from '../assets/icons/Image Gallery.svg';
-import IconActive from '../assets/icons/Image Gallery-filled.svg';
+import { PHOTOS_SCREEN } from "../constants/screens";
+import PhotosScreen from "../screens/Photos";
+import Icon from "../assets/icons/Image Gallery.svg";
+import IconActive from "../assets/icons/Image Gallery-filled.svg";
 
 const photosRouter = {
   Icon,

@@ -1,8 +1,8 @@
 import createAtomWithPersistence from "./utils";
 
-const photosAtom = createAtomWithPersistence("photos", {
+const videosAtom = createAtomWithPersistence("videos", {
   files: [],
   unsynched: [],
 });
 
-export default photosAtom;
+export default videosAtom;

@@ -1,34 +1,107 @@
-import React from "react";
-import { Text } from "react-native";
+import { useWalletConnect } from "@walletconnect/react-native-dapp";
+import { StatusBar } from "react-native";
+import { useAtom } from "jotai";
+import React, { useEffect, useState } from "react";
+import { RefreshControl, Text, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Empty from "../../components/Empty";
 import Video from "../../components/Video";
 import Sync from "../../components/Sync";
+import Upload from "../../components/Upload";
+import useLogin from "../../hooks/useLogin";
+import authAtom from "../../store/atoms/auth";
+import cloudAtom from "../../store/atoms/cloud";
+import videosAtom from "../../store/atoms/videos";
+import colors from "../../styles/colors";
+import { getContractWithSigner, loadContract } from "../../web3";
 import styles from "./styles";
 
 function VideosScreen() {
-  const videos = [
-    "https://v16-webapp.tiktok.com/087f324b611b17f0b033618a4feda615/62aa09b1/video/tos/useast2a/tos-useast2a-pve-0037-aiso/1bf033d051a74e73bc6b6af1f04d7c32/?a=1988&ch=0&cr=0&dr=0&lr=tiktok_m&cd=0%7C0%7C0%7C0&br=1084&bt=542&btag=80000&cs=0&ds=1&ft=eXd.6HnlMyq8ZXXxFwe2Nkhoyl7Gb&mime_type=video_mp4&qs=0&rc=NTs5O2c3ODgzOzdlOjpkM0BpMzVnNWY6ZnlnZDMzZjczM0AyMTMuXzYxNi0xLTIyYS1fYSMwMDBpcjQwZTRgLS1kMWNzcw%3D%3D&l=20220615103056010223082152170550A3",
-  ];
+  const connector = useWalletConnect();
+  const [cloud] = useAtom(cloudAtom);
+  const [{ connected }] = useAtom<any>(authAtom);
+  const { connectWallet, accounts } = useLogin();
+  const [refreshing, setRefreshing] = useState(false);
+  const [{ files, unsynched }, setVideos] = useAtom<any>(videosAtom);
+
+  const onUploadCompleted = (video: string) => {
+    setVideos({ files, unsynched: [...unsynched, video] });
+  };
+
+  const getFiles = async () => {
+    setRefreshing(true);
+    const contract = await loadContract(connector, cloud.address);
+    const contractWithSigner = await getContractWithSigner(connector, contract);
+    const files = await contractWithSigner.getFiles("video", {
+      gasLimit: 3000000,
+    });
+
+    const extractedFiles = files.map((file: any[]) => file[1]);
+    setVideos({ files: extractedFiles, unsynched: [] });
+    setRefreshing(false);
+  };
+
+  const refresh = () => {
+    connectWallet();
+    if (connected && cloud.address) {
+      getFiles();
+    }
+  };
+
+  useEffect(() => {
+    if (connected) {
+      getFiles();
+    }
+  }, [connected]);
+
+  const setFiles = () => {
+    setVideos({ files: [...unsynched, files], unsynched: [] });
+  };
+
+  console.log({ unsynched });
 
   const ListHeader = () => (
     <>
-      <Text style={styles.title}>Photos</Text>
-      <Text style={styles.subtitle}>102 files have not been synched</Text>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>Videos</Text>
+        <Sync fileType="video" files={unsynched} setFiles={setFiles} />
+      </View>
+      <>
+        {unsynched.length > 0 && (
+          <Text style={styles.subtitle}>
+            {unsynched.length} file(s) not been synched
+          </Text>
+        )}
+        {unsynched.length === 0 && (
+          <Text style={styles.subtitle}>All files have been synched</Text>
+        )}
+      </>
     </>
   );
 
   return (
     <>
+      <StatusBar barStyle="dark-content" hidden={false} translucent={true} />
+      <SafeAreaView />
       <FlatList
+        onRefresh={connectWallet}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            tintColor={colors.black}
+          />
+        }
         contentContainerStyle={styles.container}
         columnWrapperStyle={styles.columnWrapper}
         ListHeaderComponent={ListHeader}
-        data={[...videos, ...videos, ...videos]}
+        ListEmptyComponent={Empty}
+        data={[...unsynched, ...files]}
         renderItem={({ item }) => <Video video={item} />}
         numColumns={2}
       />
-      <Sync />
+      <Upload onUploadCompleted={onUploadCompleted} fileType="Videos" />
     </>
   );
 }

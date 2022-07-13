@@ -12,7 +12,7 @@ import styles from "./styles";
 type Props = {
   fileType: string;
   files: any[];
-  setFiles: (files: any[]) => void;
+  setFiles: () => void;
 };
 
 const Sync: React.FC<Props> = ({ fileType, files, setFiles }) => {
@@ -58,15 +58,19 @@ const Sync: React.FC<Props> = ({ fileType, files, setFiles }) => {
         { cancelable: true }
       );
 
-      return;
+      return false;
     }
 
     setCloud({
       address: response,
     });
+    return true;
   };
 
   const synchronize = async () => {
+    const isSet = await checkOrCreateCloud();
+    if (!isSet) return;
+
     setLoading(true);
 
     const filesToUpload = files.map((photo: any) => [
@@ -76,37 +80,18 @@ const Sync: React.FC<Props> = ({ fileType, files, setFiles }) => {
       Date.now(),
     ]);
 
-    await checkOrCreateCloud();
-
     const contract = await loadContract(connector, cloud.address);
     const contractWithSigner = await getContractWithSigner(connector, contract);
     contractWithSigner.createFiles(fileType, filesToUpload, {
       gasLimit: 3000000,
     });
-    setFiles([]);
+
+    setFiles();
     setLoading(false);
   };
 
-  const alertOnSync = () => {
-    Alert.alert(
-      "Synchronization",
-      "This action will clear uploaded files that are not synched, even though you decline the transaction. Are you sure you want to continue?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Yes",
-          onPress: synchronize,
-        },
-      ],
-      { cancelable: true }
-    );
-  };
-
   return (
-    <TouchableOpacity style={styles.container} onPress={alertOnSync}>
+    <TouchableOpacity style={styles.container} onPress={synchronize}>
       {!loading && (
         <>
           <SyncIcon width={18} height={18} />

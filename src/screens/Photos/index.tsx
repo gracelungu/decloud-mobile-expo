@@ -1,4 +1,5 @@
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
+import { StatusBar } from "react-native";
 import { useAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import { RefreshControl, Text, View } from "react-native";
@@ -20,17 +21,16 @@ function PhotosScreen() {
   const connector = useWalletConnect();
   const [cloud] = useAtom(cloudAtom);
   const [{ connected }] = useAtom<any>(authAtom);
-  const { connectWallet, accounts } = useLogin();
   const [refreshing, setRefreshing] = useState(false);
-  const [photos, setPhotos] = useAtom<any>(photosAtom);
-
-  console.log(cloud);
+  const [{ files, unsynched }, setPhotos] = useAtom<any>(photosAtom);
 
   const onUploadCompleted = (photo: string) => {
-    setPhotos([photo, ...photos]);
+    setPhotos({ files, unsynched: [...unsynched, photo] });
   };
 
   const getFiles = async () => {
+    if (!connected || !cloud.address) return;
+
     setRefreshing(true);
     const contract = await loadContract(connector, cloud.address);
     const contractWithSigner = await getContractWithSigner(connector, contract);
@@ -39,45 +39,43 @@ function PhotosScreen() {
     });
 
     const extractedFiles = files.map((file: any[]) => file[1]);
-    setPhotos(extractedFiles);
+    setPhotos({ files: extractedFiles, unsynched });
     setRefreshing(false);
   };
-
-  console.log({ photos });
 
   const refresh = () => {
-    setRefreshing(true);
-    connectWallet();
-    if (connected) {
-      getFiles();
-    }
+    getFiles();
   };
 
-  useEffect(() => {
-    setRefreshing(false);
-  }, [accounts]);
-
-  useEffect(() => {
-    if (connected) {
-      getFiles();
-    }
-  }, [connected]);
+  const setFiles = () => {
+    setPhotos({ files: [...unsynched, files], unsynched: [] });
+  };
 
   const ListHeader = () => (
     <>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Photos</Text>
-        <Sync fileType="photo" files={photos} setFiles={setPhotos} />
+        <Sync fileType="photo" files={unsynched} setFiles={setFiles} />
       </View>
-      <Text style={styles.subtitle}>102 files have not been synched</Text>
+      <>
+        {unsynched.length > 0 && (
+          <Text style={styles.subtitle}>
+            {unsynched.length} file(s) not been synched
+          </Text>
+        )}
+        {unsynched.length === 0 && (
+          <Text style={styles.subtitle}>All files have been synched</Text>
+        )}
+      </>
     </>
   );
 
   return (
     <>
+      <StatusBar barStyle="dark-content" hidden={false} translucent={true} />
       <SafeAreaView />
       <FlatList
-        onRefresh={connectWallet}
+        onRefresh={refresh}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -89,7 +87,7 @@ function PhotosScreen() {
         columnWrapperStyle={styles.columnWrapper}
         ListHeaderComponent={ListHeader}
         ListEmptyComponent={Empty}
-        data={photos}
+        data={[] || [...unsynched, ...files]}
         renderItem={({ item }) => <Photo photo={item} />}
         numColumns={2}
       />

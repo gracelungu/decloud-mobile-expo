@@ -24,7 +24,9 @@ function Empty() {
         )}
 
         {connected && (
-          <Text style={styles.text}>No files have been uploaded yet!</Text>
+          <>
+            <Text style={styles.text}>No files have been uploaded yet!</Text>
+          </>
         )}
 
         {!connected && (
