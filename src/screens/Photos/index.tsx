@@ -4,20 +4,20 @@ import { useAtom } from "jotai";
 import React, { useEffect, useState } from "react";
 import { RefreshControl, Text, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Empty from "../../components/Empty";
 import Photo from "../../components/Photo";
 import Sync from "../../components/Sync";
 import Upload from "../../components/Upload";
-import useLogin from "../../hooks/useLogin";
 import authAtom from "../../store/atoms/auth";
 import cloudAtom from "../../store/atoms/cloud";
 import photosAtom from "../../store/atoms/photos";
 import colors from "../../styles/colors";
 import { getContractWithSigner, loadContract } from "../../web3";
 import styles from "./styles";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function PhotosScreen() {
+  const insets = useSafeAreaInsets();
   const connector = useWalletConnect();
   const [cloud] = useAtom(cloudAtom);
   const [{ connected }] = useAtom<any>(authAtom);
@@ -53,14 +53,14 @@ function PhotosScreen() {
 
   const ListHeader = () => (
     <>
-      <View style={styles.titleContainer}>
+      <View style={[styles.titleContainer, { marginTop: insets.top }]}>
         <Text style={styles.title}>Photos</Text>
         <Sync fileType="photo" files={unsynched} setFiles={setFiles} />
       </View>
       <>
         {unsynched.length > 0 && (
           <Text style={styles.subtitle}>
-            {unsynched.length} file(s) not been synched
+            {unsynched.length} file(s) have not been synched.
           </Text>
         )}
         {unsynched.length === 0 && (
@@ -73,7 +73,6 @@ function PhotosScreen() {
   return (
     <>
       <StatusBar barStyle="dark-content" hidden={false} translucent={true} />
-      <SafeAreaView />
       <FlatList
         onRefresh={refresh}
         refreshControl={
@@ -87,7 +86,7 @@ function PhotosScreen() {
         columnWrapperStyle={styles.columnWrapper}
         ListHeaderComponent={ListHeader}
         ListEmptyComponent={Empty}
-        data={[] || [...unsynched, ...files]}
+        data={[...unsynched, ...files]}
         renderItem={({ item }) => <Photo photo={item} />}
         numColumns={2}
       />

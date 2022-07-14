@@ -30,7 +30,6 @@ const Sync: React.FC<Props> = ({ fileType, files, setFiles }) => {
 
   const createCloudAddress = async (contractWithSigner: any) => {
     const contractAddress = await contractWithSigner.createAddressCloud();
-    await contractWithSigner.transferOwnership(account);
     setCloud({
       address: contractAddress,
     });
@@ -39,12 +38,12 @@ const Sync: React.FC<Props> = ({ fileType, files, setFiles }) => {
   const checkOrCreateCloud = async () => {
     const contract = await loadContract(connector);
     const contractWithSigner = await getContractWithSigner(connector, contract);
-    const response = await contractWithSigner.getOwnerAddressCloud();
+    const response = await contractWithSigner.ownerToContract(account);
 
     if (response === DEFAULT_ADDRESS) {
       Alert.alert(
         "Create your private cloud",
-        "Do you want to create a new cloud?",
+        "Before synching you must create your private cloud address. This is the address that will be used to store your files.",
         [
           {
             text: "Cancel",
@@ -64,6 +63,7 @@ const Sync: React.FC<Props> = ({ fileType, files, setFiles }) => {
     setCloud({
       address: response,
     });
+
     return true;
   };
 
@@ -73,25 +73,52 @@ const Sync: React.FC<Props> = ({ fileType, files, setFiles }) => {
 
     setLoading(true);
 
-    const filesToUpload = files.map((photo: any) => [
-      photo.split("/").pop(),
-      photo,
-      fileType,
-      Date.now(),
-    ]);
+    console.log({ files: files[0] });
 
-    const contract = await loadContract(connector, cloud.address);
-    const contractWithSigner = await getContractWithSigner(connector, contract);
-    contractWithSigner.createFiles(fileType, filesToUpload, {
-      gasLimit: 3000000,
+    const filesToUpload = [files[0]].map((item: any) => {
+      let name = "";
+      let file = "";
+
+      if (typeof item === "string") {
+        file = item;
+        name = item.split("/").pop();
+      }
+
+      if (typeof item === "object") {
+        name = item.name;
+        if (item.phoneNumbers && item.phoneNumbers.length > 0) {
+          file = item.phoneNumbers[0].number;
+        }
+      }
+
+      return [name, file, fileType, Date.now()];
     });
+
+    console.log({ filesToUpload: filesToUpload.length });
+
+    try {
+      const contract = await loadContract(connector, cloud.address);
+      const contractWithSigner = await getContractWithSigner(
+        connector,
+        contract
+      );
+      await contractWithSigner.createFiles(fileType, filesToUpload, {
+        gasLimit: 3000000,
+      });
+    } catch (e) {
+      console.log(e);
+    }
 
     setFiles();
     setLoading(false);
   };
 
   return (
-    <TouchableOpacity style={styles.container} onPress={synchronize}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={synchronize}
+      disabled={loading}
+    >
       {!loading && (
         <>
           <SyncIcon width={18} height={18} />

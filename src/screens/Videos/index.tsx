@@ -1,10 +1,9 @@
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
 import { StatusBar } from "react-native";
 import { useAtom } from "jotai";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { RefreshControl, Text, View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Empty from "../../components/Empty";
 import Video from "../../components/Video";
 import Sync from "../../components/Sync";
@@ -16,8 +15,10 @@ import videosAtom from "../../store/atoms/videos";
 import colors from "../../styles/colors";
 import { getContractWithSigner, loadContract } from "../../web3";
 import styles from "./styles";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function VideosScreen() {
+  const insets = useSafeAreaInsets();
   const connector = useWalletConnect();
   const [cloud] = useAtom(cloudAtom);
   const [{ connected }] = useAtom<any>(authAtom);
@@ -30,6 +31,8 @@ function VideosScreen() {
   };
 
   const getFiles = async () => {
+    if (!connected || !cloud.address) return;
+
     setRefreshing(true);
     const contract = await loadContract(connector, cloud.address);
     const contractWithSigner = await getContractWithSigner(connector, contract);
@@ -43,17 +46,8 @@ function VideosScreen() {
   };
 
   const refresh = () => {
-    connectWallet();
-    if (connected && cloud.address) {
-      getFiles();
-    }
+    getFiles();
   };
-
-  useEffect(() => {
-    if (connected) {
-      getFiles();
-    }
-  }, [connected]);
 
   const setFiles = () => {
     setVideos({ files: [...unsynched, files], unsynched: [] });
@@ -63,7 +57,7 @@ function VideosScreen() {
 
   const ListHeader = () => (
     <>
-      <View style={styles.titleContainer}>
+      <View style={[styles.titleContainer, { marginTop: insets.top }]}>
         <Text style={styles.title}>Videos</Text>
         <Sync fileType="video" files={unsynched} setFiles={setFiles} />
       </View>
@@ -83,7 +77,6 @@ function VideosScreen() {
   return (
     <>
       <StatusBar barStyle="dark-content" hidden={false} translucent={true} />
-      <SafeAreaView />
       <FlatList
         onRefresh={connectWallet}
         refreshControl={

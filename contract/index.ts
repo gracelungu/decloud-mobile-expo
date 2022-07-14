@@ -1,5 +1,5 @@
 export const cloudContractAddress =
-  "0x5fd903920F05cb8589cF4490e5F05c9D19D54280";
+  "0x815Dd2898ACe8D3dD283Dc90eE9B229943094abA";
 
 export const networks = {
   ropsten: {

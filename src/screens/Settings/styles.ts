@@ -6,12 +6,11 @@ export default ScaledSheet.create({
     backgroundColor: colors.lightGray,
   },
   title: {
-    paddingTop: "60@s",
     fontSize: "18@s",
-    fontWeight: "400",
+    fontWeight: "500",
     paddingRight: "15@s",
     paddingLeft: "15@s",
-    paddingBottom: "15@s",
+    paddingBottom: "25@s",
   },
   itemContainer: {
     padding: "15@s",
@@ -39,6 +38,7 @@ export default ScaledSheet.create({
     fontWeight: "700",
     paddingBottom: "5@s",
     marginTop: "25@s",
+    color: colors.primary,
   },
   titleContainer: {
     width: "100%",
@@ -54,4 +54,11 @@ export default ScaledSheet.create({
     paddingBottom: "5@s",
   },
   switch: { transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }] },
+  action: {
+    backgroundColor: "#aaa",
+  },
+  actionText: {
+    textAlign: "center",
+    color: colors.white,
+  },
 });

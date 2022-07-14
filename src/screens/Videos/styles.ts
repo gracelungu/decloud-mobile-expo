@@ -6,6 +6,7 @@ export default ScaledSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingBottom: "5@s",
+    paddingTop: "15@s",
   },
   container: {
     width: "100%",

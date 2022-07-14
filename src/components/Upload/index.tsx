@@ -41,7 +41,11 @@ const Upload: React.FC<Props> = ({
   };
 
   return (
-    <TouchableOpacity style={styles.container} onPress={pickImage}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={pickImage}
+      disabled={loading}
+    >
       {!loading && <UploadIcon width={s(30)} height={s(30)} />}
       {loading && <ActivityIndicator />}
     </TouchableOpacity>
