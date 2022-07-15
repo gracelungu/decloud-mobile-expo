@@ -61,4 +61,13 @@ export default ScaledSheet.create({
     textAlign: "center",
     color: colors.white,
   },
+  input: {
+    height: "40@s",
+    backgroundColor: colors.lightGray,
+    fontSize: "15@s",
+    fontWeight: "300",
+    marginBottom: "30@s",
+    marginTop: "20@s",
+    padding: "10@s",
+  },
 });

@@ -53,7 +53,7 @@ function VideosScreen() {
     setVideos({ files: [...unsynched, files], unsynched: [] });
   };
 
-  console.log({ unsynched });
+  console.log({ files });
 
   const ListHeader = () => (
     <>

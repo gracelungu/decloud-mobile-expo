@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { StatusBar, Switch, Text, TouchableOpacity, View } from "react-native";
+import {
+  StatusBar,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { s } from "react-native-size-matters";
 import WalletIcon from "../../assets/icons/Wallet.svg";
@@ -7,6 +14,7 @@ import ContractIcon from "../../assets/icons/Contract.svg";
 import EthereumIcon from "../../assets/icons/ethereum.svg";
 import CloudIcon from "../../assets/icons/Cloud.svg";
 import RemoveIcon from "../../assets/icons/Remove.svg";
+import PinataIcon from "../../assets/icons/pinata.svg";
 import styles from "./styles";
 import colors from "../../styles/colors";
 import authAtom from "../../store/atoms/auth";
@@ -16,8 +24,15 @@ import cloudAtom from "../../store/atoms/cloud";
 import { getContractWithSigner, loadContract } from "../../web3";
 import { useWalletConnect } from "@walletconnect/react-native-dapp";
 import useLogin from "../../hooks/useLogin";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ModalComponent from "../../components/Modal";
+import settingsAtom from "../../store/atoms/settings";
 
 function SettingsScreen() {
+  const [settings, setSettings] = useAtom(settingsAtom);
+  const [visible, setVisible] = useState(false);
+  const [token, setToken] = useState();
+  const insets = useSafeAreaInsets();
   const [{ connected }] = useAtom<any>(authAtom);
   const { connectWallet, killSession } = useLogin();
   const [loading, setLoading] = useState(false);
@@ -41,7 +56,7 @@ function SettingsScreen() {
     <>
       <StatusBar barStyle="dark-content" hidden={false} translucent={true} />
       <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-        <View>
+        <View style={[{ marginTop: insets.top, paddingTop: s(15) }]}>
           <Text style={styles.title}>Settings</Text>
 
           <View style={styles.itemContainer}>
@@ -84,6 +99,20 @@ function SettingsScreen() {
               <EthereumIcon width={s(18)} height={s(18)} />
               <Text style={styles.itemSubtitle}> Ropsten test network</Text>
             </View>
+          </View>
+
+          <View style={styles.itemContainer}>
+            <Text style={styles.itemTitle}>Pinata Token</Text>
+            <View style={styles.itemSubContainer}>
+              <PinataIcon width={s(18)} height={s(18)} />
+              <Text style={styles.itemSubtitle}>
+                {shortenAddress(settings?.pinataToken)}
+              </Text>
+            </View>
+
+            <TouchableOpacity onPress={() => setVisible(true)}>
+              <Text style={styles.itemButtonText}>Update pinata token</Text>
+            </TouchableOpacity>
           </View>
 
           {/* {cloudAddress && (
@@ -149,6 +178,24 @@ function SettingsScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <ModalComponent
+        visible={visible}
+        title="Pinata IPFS token"
+        text="Provide a token to be used for your pinata cloud"
+        onClose={() => setVisible(false)}
+        onSubmit={() => {
+          setSettings({ ...settings, pinataToken: token });
+          setVisible(false);
+        }}
+      >
+        <TextInput
+          style={styles.input}
+          placeholder="Token"
+          value={token}
+          onChangeText={(text) => setToken(text)}
+        />
+      </ModalComponent>
     </>
   );
 }

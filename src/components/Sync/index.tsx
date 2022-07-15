@@ -73,9 +73,7 @@ const Sync: React.FC<Props> = ({ fileType, files, setFiles }) => {
 
     setLoading(true);
 
-    console.log({ files: files[0] });
-
-    const filesToUpload = [files[0]].map((item: any) => {
+    const filesToUpload = files.map((item: any) => {
       let name = "";
       let file = "";
 
@@ -86,7 +84,11 @@ const Sync: React.FC<Props> = ({ fileType, files, setFiles }) => {
 
       if (typeof item === "object") {
         name = item.name;
-        if (item.phoneNumbers && item.phoneNumbers.length > 0) {
+        if (
+          item.phoneNumbers &&
+          item.phoneNumbers.length &&
+          item.phoneNumbers.length > 0
+        ) {
           file = item.phoneNumbers[0].number;
         }
       }

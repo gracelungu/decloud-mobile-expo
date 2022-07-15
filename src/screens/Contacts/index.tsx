@@ -23,7 +23,7 @@ function ContactsScreen() {
   const [{ connected }] = useAtom<any>(authAtom);
   const [refreshing, setRefreshing] = useState(false);
   const [{ files, unsynched }, setContacts] = useAtom<any>(contactsAtom);
-  const { contacts: phoneBook, getContacts } = useContacts();
+  const { contacts: phoneBook } = useContacts();
 
   const getFiles = async () => {
     if (!connected || !cloud.address) return;
@@ -35,7 +35,10 @@ function ContactsScreen() {
       gasLimit: 3000000,
     });
 
-    const extractedFiles = files.map((file: any[]) => file[1]);
+    const extractedFiles = files.map((file: any[]) => ({
+      name: file[0],
+      phoneNumbers: [{ number: file[1] }],
+    }));
     setContacts({ files: extractedFiles, unsynched });
     setRefreshing(false);
   };
@@ -50,15 +53,30 @@ function ContactsScreen() {
 
   useEffect(() => {
     if (phoneBook) {
-      setContacts({ files: phoneBook, unsynched: phoneBook });
+      setContacts({ files: phoneBook, unsynched: filesToSync(phoneBook) });
     }
   }, [phoneBook]);
+
+  const filesToSync = (files: any) => {
+    return unsynched.filter(
+      (file: any) =>
+        file.name &&
+        file.phoneNumbers &&
+        file.phoneNumbers.length &&
+        file.phoneNumbers.length > 0 &&
+        file.phoneNumbers[0].number
+    );
+  };
 
   const ListHeader = () => (
     <>
       <View style={[styles.titleContainer, { marginTop: insets.top }]}>
         <Text style={styles.title}>Contacts</Text>
-        <Sync fileType="contact" files={unsynched} setFiles={setFiles} />
+        <Sync
+          fileType="contact"
+          files={filesToSync(unsynched)}
+          setFiles={setFiles}
+        />
       </View>
       <>
         {unsynched.length > 0 && (

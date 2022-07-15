@@ -1,14 +1,17 @@
 import axios from "axios";
 import { ImageInfo } from "expo-image-picker";
+import { useAtom } from "jotai";
 import { useState } from "react";
 import { Platform } from "react-native";
 import { IPFS_UPLOAD_URL, PINATA_JWT } from "../../credentials";
+import settingsAtom from "../store/atoms/settings";
 
 type UseUploadType = {
   fileType: string;
 };
 
 const useUpload = ({ fileType }: UseUploadType) => {
+  const [settings] = useAtom(settingsAtom);
   const upload = async (file: ImageInfo) => {
     try {
       const data = new FormData();
@@ -22,7 +25,7 @@ const useUpload = ({ fileType }: UseUploadType) => {
         method: "post",
         url: IPFS_UPLOAD_URL,
         headers: {
-          Authorization: `Bearer ${PINATA_JWT}`,
+          Authorization: `Bearer ${settings?.pinataToken}`,
           "Content-Type":
             "multipart/form-data; charset=utf-8; boundary=------random-boundary",
         },
