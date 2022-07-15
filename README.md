@@ -2,6 +2,8 @@
 
 A cloud storage react native mobile app, aiming at creating an interface for saving files to the blockchain with the help of IPFS.
 
+![Preview](https://github.com/gracelungu/decloud-mobile-expo/blob/master/assets/images/preview.png?raw=true)
+
 ### Why
 
 The goal of this project is to be an alternative to mobile cloud storage such as the infamous apple's icloud.
